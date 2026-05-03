@@ -1,0 +1,12 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query6() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 { 
+  SumAccum<INT> @@total = 0;
+
+  result = SELECT person1
+           FROM
+           Person:person1 - (KNOWS) - Person:person2 -(KNOWS) - Person:person3 - (Person_Has_Interest_Tag>)-Tag:tag WHERE person1 !=person3
+           ACCUM @@total += 1;
+
+  PRINT @@total AS totalCount;
+}

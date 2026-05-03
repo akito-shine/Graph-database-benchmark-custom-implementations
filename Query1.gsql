@@ -1,0 +1,20 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query1() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+  SumAccum<INT> @@total = 0;
+
+  cities =
+    SELECT tcl
+    FROM Country:c
+         -(<IS_PART_OF)- City:ci
+         -(<IS_LOCATED_IN)- Person:p
+         -(<HAS_MEMBER)- Forum:f
+         -(CONTAINER_OF>)- Post:po
+         -(<REPLY_OF)- Comment:co
+         -(Comment_HAS_TAG>)- Tag:t
+         -(HAS_TYPE>)- TagClass:tcl
+    ACCUM
+      @@total += 1;
+
+  PRINT @@total AS totalCount;
+}

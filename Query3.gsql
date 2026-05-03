@@ -1,0 +1,15 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query3() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+
+  SumAccum<INT> @@total = 0;
+
+  result = SELECT person3
+    FROM 
+
+    Country:country-(<IS_PART_OF)- City:city1-(<IS_LOCATED_IN)- Person:person1-(KNOWS)-Person:person2,
+    Country:country-(<IS_PART_OF)- City:city2-(<IS_LOCATED_IN)- Person:person2-(KNOWS)-Person:person3,
+    Country:country-(<IS_PART_OF)- City:city3-(<IS_LOCATED_IN)-Person:person3-(KNOWS)-Person:person1
+    ACCUM @@total +=1;
+    PRINT @@total AS totalCount;
+}

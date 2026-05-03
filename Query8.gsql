@@ -1,0 +1,27 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query8() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+
+  SumAccum<INT> @@po = 0;
+  SumAccum<INT> @@ne = 0;
+  SumAccum<INT> @@count = 0;
+  positive=
+    SELECT comment
+    FROM
+      Tag:tag1 -( <Message_Has_Tag )- Message:message
+      -( <Comment_Reply_Of_Message )- Comment:comment
+      -( Comment_HAS_TAG > )- Tag:tag2
+    WHERE tag1!=tag2
+    ACCUM @@po +=1;
+  negative=
+    SELECT comment 
+    FROM
+      Tag:tag1 -( <Message_Has_Tag )- Message:message
+      -( <Comment_Reply_Of_Message )- Comment:comment
+      -( Comment_HAS_TAG > )- Tag:tag2,
+      Comment:comment-(Comment_HAS_TAG>)-Tag:tag1
+    WHERE tag1!=tag2
+    ACCUM @@ne +=1;
+  @@count=@@po-@@ne;
+  PRINT @@count AS countIf;
+}

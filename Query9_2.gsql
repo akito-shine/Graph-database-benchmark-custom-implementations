@@ -1,0 +1,19 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query9_2() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+
+
+  SumAccum<INT> @@necount;
+  negative=
+    SELECT person3
+    FROM
+      Person:person1 -( KNOWS )- Person:person2
+      -( KNOWS )- Person:person3
+      -( Person_Has_Interest_Tag > )- Tag:tag,
+      Person:person1 -( KNOWS )- Person:person3
+    WHERE person1!=person3
+  ACCUM @@necount +=1;
+  PRINT @@necount AS netotal;
+}
+
+

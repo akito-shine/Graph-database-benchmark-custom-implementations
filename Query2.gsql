@@ -1,0 +1,15 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query2() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+  SumAccum<INT> @@total = 0;
+
+  result = SELECT p2
+           FROM
+             Person:p1 -(KNOWS)- Person:p2,
+             Person:p1 -(<Comment_Has_Creator_Person)-
+             Comment:comment -(REPLY_OF>)-
+             Post:post -(Post_HAS_CREATOR>)- Person:p2
+           ACCUM @@total += 1;
+
+  PRINT @@total AS totalCount;
+}

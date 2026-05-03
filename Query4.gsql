@@ -1,0 +1,14 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query4() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+  SumAccum<INT> @@total = 0;
+
+  result = SELECT message
+           FROM
+             Tag:tag - (<Message_Has_Tag) - Message:message - (Message_Has_Creator>) - Person:person,
+             Message:message - (<Person_Likes_Message)- Person:liker,
+             Message:message -(<Comment_Reply_Of_Message) - Comment:comment
+           ACCUM @@total += 1;
+
+  PRINT @@total AS totalCount;
+}

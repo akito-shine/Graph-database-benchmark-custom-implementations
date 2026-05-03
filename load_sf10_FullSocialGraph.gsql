@@ -1,0 +1,100 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE LOADING JOB load_sf10_FullSocialGraph FOR GRAPH FullSocialGraph_SF10 {
+
+  # Define CSV files
+  DEFINE FILENAME person_file = "/home/tigergraph/social-network-sf10-projected-fk/Person.csv";
+  DEFINE FILENAME post_file = "/home/tigergraph/social-network-sf10-projected-fk/Post.csv";
+  DEFINE FILENAME comment_file = "/home/tigergraph/social-network-sf10-projected-fk/Comment.csv";
+  DEFINE FILENAME country_file = "/home/tigergraph/social-network-sf10-projected-fk/Country.csv";
+  DEFINE FILENAME city_file = "/home/tigergraph/social-network-sf10-projected-fk/City.csv";
+  DEFINE FILENAME forum_file = "/home/tigergraph/social-network-sf10-projected-fk/Forum.csv";
+  DEFINE FILENAME tag_file = "/home/tigergraph/social-network-sf10-projected-fk/Tag.csv";
+  DEFINE FILENAME tagclass_file = "/home/tigergraph/social-network-sf10-projected-fk/TagClass.csv";
+  DEFINE FILENAME company_file = "/home/tigergraph/social-network-sf10-projected-fk/Company.csv";
+  DEFINE FILENAME university_file = "/home/tigergraph/social-network-sf10-projected-fk/University.csv";
+  DEFINE FILENAME continent_file = "/home/tigergraph/social-network-sf10-projected-fk/Continent.csv";
+  DEFINE FILENAME message_file = "/home/tigergraph/social-network-sf10-projected-fk/Message.csv";
+
+
+  # Edge CSVs
+  DEFINE FILENAME person_knows_person_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_knows_Person.csv";
+  DEFINE FILENAME person_hasInterest_tag_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_hasInterest_Tag.csv";
+  DEFINE FILENAME person_workAt_company_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_workAt_Company.csv";
+  DEFINE FILENAME person_studyAt_university_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_studyAt_University.csv";
+  DEFINE FILENAME forum_hasMember_person_file = "/home/tigergraph/social-network-sf10-projected-fk/Forum_hasMember_Person.csv";
+  DEFINE FILENAME forum_hasTag_tag_file = "/home/tigergraph/social-network-sf10-projected-fk/Forum_hasTag_Tag.csv";
+  DEFINE FILENAME comment_hasTag_tag_file = "/home/tigergraph/social-network-sf10-projected-fk/Comment_hasTag_Tag.csv";
+  DEFINE FILENAME person_likes_post_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_likes_Post.csv";
+  DEFINE FILENAME person_likes_comment_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_likes_Comment.csv";
+  DEFINE FILENAME comment_hascreator_person_file = "/home/tigergraph/social-network-sf10-projected-fk/Comment_hasCreator_Person.csv";
+  DEFINE FILENAME Post_Has_Tag_file= "/home/tigergraph/social-network-sf10-projected-fk/Post_hasTag_Tag.csv";
+  
+  # New edge files
+  DEFINE FILENAME comment_replyOf_comment_file = "/home/tigergraph/social-network-sf10-projected-fk/Comment_replyOf_Comment.csv";
+  DEFINE FILENAME country_isPartOf_continent_file = "/home/tigergraph/social-network-sf10-projected-fk/Country_isPartOf_Continent.csv";
+  DEFINE FILENAME city_isPartOf_country_file = "/home/tigergraph/social-network-sf10-projected-fk/City_isPartOf_Country.csv";
+  DEFINE FILENAME person_isLocatedIn_city_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_isLocatedIn_City.csv";
+  DEFINE FILENAME forum_containerOf_post_file = "/home/tigergraph/social-network-sf10-projected-fk/Forum_containerOf_Post.csv";
+  DEFINE FILENAME comment_replyOf_post_file = "/home/tigergraph/social-network-sf10-projected-fk/Comment_replyOf_Post.csv";
+  DEFINE FILENAME company_isLocatedIn_country_file = "/home/tigergraph/social-network-sf10-projected-fk/Company_isLocatedIn_Country.csv";
+  DEFINE FILENAME tag_hasType_tagclass_file = "/home/tigergraph/social-network-sf10-projected-fk/Tag_hasType_TagClass.csv";
+  DEFINE FILENAME forum_hasModerator_person_file = "/home/tigergraph/social-network-sf10-projected-fk/Forum_hasModerator_Person.csv";
+  DEFINE FILENAME tagclass_isSubclassOf_tagclass_file = "/home/tigergraph/social-network-sf10-projected-fk/TagClass_isSubclassOf_TagClass.csv";
+  DEFINE FILENAME university_isLocatedIn_city_file = "/home/tigergraph/social-network-sf10-projected-fk/University_isLocatedIn_City.csv";
+  DEFINE FILENAME post_has_creator_file = "/home/tigergraph/social-network-sf10-projected-fk/Post_hasCreator_Person.csv";
+  DEFINE FILENAME Person_Likes_Comment_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_likes_Comment.csv";
+  DEFINE FILENAME Message_hasTag_Tag_file = "/home/tigergraph/social-network-sf10-projected-fk/Message_hasTag_Tag.csv";
+  DEFINE FILENAME Message_hasCreator_Person_file = "/home/tigergraph/social-network-sf10-projected-fk/Message_hasCreator_Person.csv";
+  DEFINE FILENAME Person_Likes_Message_file = "/home/tigergraph/social-network-sf10-projected-fk/Person_likes_Message.csv";
+  DEFINE FILENAME Comment_Reply_Of_Message_file = "/home/tigergraph/social-network-sf10-projected-fk/Message_replyOf_Message.csv";
+
+  # Load vertices
+  LOAD person_file TO VERTEX Person VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD post_file TO VERTEX Post VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD comment_file TO VERTEX Comment VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD country_file TO VERTEX Country VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD city_file TO VERTEX City VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD forum_file TO VERTEX Forum VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD tag_file TO VERTEX Tag VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD tagclass_file TO VERTEX TagClass VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD company_file TO VERTEX Company VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD university_file TO VERTEX University VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD continent_file TO VERTEX Continent VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD message_file TO VERTEX Message VALUES($0) USING SEPARATOR="|", HEADER="false", EOL="\n";
+
+
+  # Load edges
+  LOAD person_knows_person_file TO EDGE KNOWS VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD person_hasInterest_tag_file TO EDGE Person_Has_Interest_Tag VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n"; 
+  LOAD person_workAt_company_file TO EDGE WORKS_AT VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD person_studyAt_university_file TO EDGE STUDY_AT VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD forum_hasMember_person_file TO EDGE HAS_MEMBER VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD forum_hasTag_tag_file TO EDGE FORUM_HAS_TAG VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD comment_hasTag_tag_file TO EDGE Comment_HAS_TAG VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD person_likes_post_file TO EDGE Person_Likes_Post VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  #LOAD person_likes_comment_file TO EDGE REPLY_OF VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD comment_hasTag_tag_file TO EDGE Comment_HAS_TAG VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+
+  # New edges
+  #LOAD comment_replyOf_comment_file TO EDGE REPLY_OF_COMMENT VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  #LOAD country_isPartOf_continent_file TO EDGE IS_PART_OF_CONTINENT VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n"; 
+  LOAD city_isPartOf_country_file TO EDGE IS_PART_OF VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD person_isLocatedIn_city_file TO EDGE IS_LOCATED_IN VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD forum_containerOf_post_file TO EDGE CONTAINER_OF VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD comment_replyOf_post_file TO EDGE REPLY_OF VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n"; 
+  LOAD person_isLocatedIn_city_file TO EDGE IS_LOCATED_IN VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD tag_hasType_tagclass_file TO EDGE HAS_TYPE VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD comment_hascreator_person_file TO EDGE Comment_Has_Creator_Person VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD Post_Has_Tag_file TO EDGE Post_Has_Tag VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD post_has_creator_file TO EDGE Post_HAS_CREATOR VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD Person_Likes_Comment_file TO EDGE Person_Likes_Comment VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD Message_hasTag_Tag_file TO EDGE Message_Has_Tag VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD Message_hasCreator_Person_file TO EDGE Message_Has_Creator VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD Person_Likes_Message_file TO EDGE Person_Likes_Message VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  LOAD Comment_Reply_Of_Message_file TO EDGE Comment_Reply_Of_Message VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  #LOAD forum_hasModerator_person_file TO EDGE HAS_MODERATOR VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  #LOAD tagclass_isSubclassOf_tagclass_file TO EDGE IS_SUBCLASS_OF VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n";
+  #LOAD university_isLocatedIn_city_file TO EDGE IS_LOCATED_IN_CITY VALUES($0, $1) USING SEPARATOR="|", HEADER="false", EOL="\n"; 
+
+}

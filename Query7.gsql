@@ -1,0 +1,86 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query7() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+
+  // Per-message accumulators
+  SumAccum<INT> @tagCount;
+  SumAccum<INT> @creatorCount;
+  SumAccum<INT> @likeCount;
+  SumAccum<INT> @commentCount;
+  OrAccum @inBase;   // message has >=1 tag AND >=1 creator
+
+  // NEW: sets to deduplicate likers and comments, and distinct counters
+  SetAccum<VERTEX<Person>>  @likerSet;
+  SetAccum<VERTEX<Comment>> @commentSet;
+  SumAccum<INT> @likeCountDistinct;
+  SumAccum<INT> @commentCountDistinct;
+
+  // 1) Count tags per message
+  tagAgg =
+    SELECT m
+    FROM Tag:t -(<Message_Has_Tag)- Message:m
+    ACCUM m.@tagCount += 1;
+
+  // 2) Count creators per message
+  creatorAgg =
+    SELECT m
+    FROM Message:m -(Message_Has_Creator>)- Person:creator
+    ACCUM m.@creatorCount += 1;
+
+  // 3) Mark messages that satisfy the mandatory MATCH (>=1 tag AND >=1 creator)
+  base =
+    SELECT m
+    FROM Message:m
+    WHERE m.@tagCount > 0 AND m.@creatorCount > 0
+    ACCUM m.@inBase += true;
+
+  // 4) Count likes per message (OPTIONAL in Cypher, so we compute separately)
+  likesAgg =
+    SELECT m
+    FROM Person:liker -(Person_Likes_Message>)- Message:m
+    ACCUM
+      m.@likeCount += 1,
+      m.@likerSet  += liker;  // NEW: collect unique likers
+
+  // 5) Count comments per message (OPTIONAL in Cypher, so we compute separately)
+  commentsAgg =
+    SELECT m
+    FROM Comment:c -(Comment_Reply_Of_Message>)- Message:m
+    ACCUM
+      m.@commentCount += 1,
+      m.@commentSet   += c;   // NEW: collect unique comments
+
+  // NEW: compute distinct like count by iterating the liker set (compatible with environments where size(SetAccum) isn't available)
+  distinct_like=
+  SELECT m
+  FROM base:m
+  POST-ACCUM
+    FOREACH l IN m.@likerSet DO
+      m.@likeCountDistinct += 1
+    END;
+
+  // NEW: compute distinct comment count by iterating the comment set
+  distinct_comment=
+  SELECT m
+  FROM base:m
+  POST-ACCUM
+    FOREACH c IN m.@commentSet DO
+      m.@commentCountDistinct += 1
+    END;
+
+  // 6) Final sum: tagCount × creatorCount × max(1, likeCountDistinct) × max(1, commentCountDistinct)
+  SumAccum<INT> @@totalRows = 0;
+
+  finalSum =
+    SELECT m
+    FROM base:m
+    ACCUM
+      @@totalRows +=
+        m.@tagCount
+        * m.@creatorCount
+        * (CASE WHEN m.@likeCountDistinct    > 0 THEN m.@likeCountDistinct    ELSE 1 END)
+        * (CASE WHEN m.@commentCountDistinct > 0 THEN m.@commentCountDistinct ELSE 1 END);
+
+  PRINT @@totalRows AS Totalcount; // Emulates Cypher's RETURN count(*)
+}
+

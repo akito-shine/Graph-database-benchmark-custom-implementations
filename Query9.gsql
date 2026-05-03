@@ -1,0 +1,27 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query9() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+
+  SumAccum<INT> @@po = 0;
+  SumAccum<INT> @@ne = 0;
+  SumAccum<INT> @@count = 0;
+  positive=
+    SELECT tag
+    FROM
+      Person:person1 -( KNOWS )- Person:person2
+      -( KNOWS )- Person:person3
+      -( Person_Has_Interest_Tag > )- Tag:tag
+    WHERE person1!=person3
+    ACCUM @@po +=1;
+  negative=
+    SELECT tag
+    FROM
+      Person:person1 -( KNOWS )- Person:person2
+      -( KNOWS )- Person:person3
+      -( Person_Has_Interest_Tag > )- Tag:tag,
+      Person:person1 -( KNOWS )- Person:person3
+    WHERE person1!=person3
+    ACCUM @@ne +=1;
+  @@count=@@po-@@ne;
+  PRINT @@count AS countIf;
+}

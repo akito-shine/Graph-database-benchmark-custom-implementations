@@ -1,0 +1,16 @@
+USE GRAPH FullSocialGraph_SF10
+
+CREATE OR REPLACE QUERY Query5() FOR GRAPH FullSocialGraph_SF10 SYNTAX v2 {
+
+  SumAccum<INT> @@total = 0;
+
+  result =
+    SELECT comment
+    FROM
+      Tag:tag1 -( <Message_Has_Tag )- Message:message
+      -( <Comment_Reply_Of_Message )- Comment:comment
+      -( Comment_HAS_TAG > )- Tag:tag2
+    WHERE tag1!=tag2
+    ACCUM @@total += 1;
+  PRINT @@total AS totalCount;
+}
